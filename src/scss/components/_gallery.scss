@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  visibility: hidden;
 
   &__figure {
     position: relative;
@@ -12,8 +13,6 @@
       height: 85rem;
       width: 70rem;
     }
-
-   
   }
 
   &__img {
