@@ -8,7 +8,7 @@ export default class {
   viewport: ISizes = { width: 0, height: 0 };
   screen: ISizes = { width: 0, height: 0 };
 
-  geometry: THREE.PlaneGeometry;
+  geometry: THREE.BufferGeometry;
 
   domFiguresList: Array<HTMLElement> | null = null;
   slides: Array<Tile> | undefined = [];
@@ -44,5 +44,11 @@ export default class {
     });
   }
 
-  render() {}
+  update() {
+    this.slides?.forEach((tile) => tile.update());
+  }
+
+  onResize({ screen, viewport }: { screen: ISizes; viewport: ISizes }) {
+    this.slides?.forEach((tile) => tile.onResize({ screen, viewport }));
+  }
 }

@@ -28,21 +28,17 @@ export default class {
 
   setup() {
     this.setupCamera();
-    this.setSizes();
+    this.onResize();
 
     this.addObjects();
 
     this.setupRenderer();
   }
 
-  bindEvents() {
-    window.addEventListener("resize", this.setSizes.bind(this));
-  }
-
   setupRenderer() {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setAnimationLoop(() => {
-      this.render();
+      this.update();
     });
   }
 
@@ -51,7 +47,19 @@ export default class {
     this.camera.position.z = 5;
   }
 
-  setSizes() {
+  addObjects() {
+    this.slideshow = new SlideShow(this.scene, this.viewport, this.screen);
+  }
+
+  update() {
+    this.slideshow?.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  // Event Handlers Callbacks
+  onWheel() {}
+
+  onResize() {
     this.screen = {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -69,22 +77,12 @@ export default class {
       width,
       height,
     };
+
+    this.slideshow?.onResize({ screen: this.screen, viewport: this.viewport });
   }
 
-  addObjects() {
-    this.slideshow = new SlideShow(this.scene, this.viewport, this.screen);
+  // Events binding
+  bindEvents() {
+    window.addEventListener("resize", this.onResize.bind(this));
   }
-
-  /**
-   * Actions
-   */
-  render() {
-    this.slideshow?.render();
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  /**
-   * Handlers
-   */
-  onWheel() {}
 }
