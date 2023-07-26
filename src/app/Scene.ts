@@ -1,11 +1,13 @@
 import * as THREE from "three";
+import { ISizes } from "../interface/Size.interface";
+import SlideShow from "./SlideShow";
 
 export default class {
-  screen: { width: number; height: number } = {
+  screen: ISizes = {
     width: window.innerWidth,
     height: window.innerHeight,
   };
-  viewport: { width: number; height: number } = {
+  viewport: ISizes = {
     width: 0,
     height: 0,
   };
@@ -17,37 +19,37 @@ export default class {
   camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
   scene: THREE.Scene = new THREE.Scene();
 
+  slideshow: SlideShow | null = null;
+
   constructor() {
-    this.init();
+    this.setup();
+    this.bindEvents();
   }
 
-  init() {
-    this.setupRenderer();
+  setup() {
     this.setupCamera();
     this.setSizes();
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    this.scene.add(cube);
+    this.addObjects();
 
-    this.update();
-    this.addEventListeners();
+    this.setupRenderer();
+  }
+
+  bindEvents() {
+    window.addEventListener("resize", this.setSizes.bind(this));
   }
 
   setupRenderer() {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setAnimationLoop(() => {
+      this.render();
+    });
   }
 
   setupCamera() {
     this.camera.fov = 45;
     this.camera.position.z = 5;
   }
-
-  /**
-   * Handlers
-   */
-  onWheel() {}
 
   setSizes() {
     this.screen = {
@@ -69,16 +71,20 @@ export default class {
     };
   }
 
-  update() {
-    requestAnimationFrame(this.update.bind(this));
+  addObjects() {
+    this.slideshow = new SlideShow(this.scene, this.viewport, this.screen);
+  }
+
+  /**
+   * Actions
+   */
+  render() {
+    this.slideshow?.render();
     this.renderer.render(this.scene, this.camera);
   }
 
   /**
-   * Add Event Listeners
+   * Handlers
    */
-
-  addEventListeners() {
-    window.addEventListener("resize", this.setSizes.bind(this));
-  }
+  onWheel() {}
 }
