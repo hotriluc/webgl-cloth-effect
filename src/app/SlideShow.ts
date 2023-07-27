@@ -1,10 +1,15 @@
 import { ISizes } from "../interface/Size.interface";
 
 import * as THREE from "three";
+import * as C from "cannon-es";
+
 import Tile from "./Tile";
+
+const segments = 8;
 
 export default class {
   scene: THREE.Scene;
+  world: C.World;
   viewport: ISizes = { width: 0, height: 0 };
   screen: ISizes = { width: 0, height: 0 };
 
@@ -13,12 +18,18 @@ export default class {
   domFiguresList: Array<HTMLElement> | null = null;
   slides: Array<Tile> | undefined = [];
 
-  constructor(scene: THREE.Scene, viewport: ISizes, screen: ISizes) {
+  constructor(
+    scene: THREE.Scene,
+    world: C.World,
+    viewport: ISizes,
+    screen: ISizes
+  ) {
     this.scene = scene;
+    this.world = world;
     this.viewport = viewport;
     this.screen = screen;
 
-    this.geometry = new THREE.PlaneGeometry();
+    this.geometry = new THREE.PlaneGeometry(1, 1, segments, segments);
     this.domFiguresList = Array.from(
       document.querySelectorAll(".gallery__figure")
     );
@@ -36,6 +47,7 @@ export default class {
         element: el,
         geometry: this.geometry,
         scene: this.scene,
+        world: this.world,
         screen: this.screen,
         viewport: this.viewport,
       });
@@ -45,6 +57,8 @@ export default class {
   }
 
   update() {
+    this.world.step(1 / 60);
+
     this.slides?.forEach((tile) => tile.update());
   }
 

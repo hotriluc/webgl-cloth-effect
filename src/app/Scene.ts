@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import * as C from "cannon-es";
+
 import { ISizes } from "../interface/Size.interface";
 import SlideShow from "./SlideShow";
 
@@ -18,6 +20,7 @@ export default class {
   });
   camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
   scene: THREE.Scene = new THREE.Scene();
+  world: C.World = new C.World();
 
   slideshow: SlideShow | null = null;
 
@@ -33,6 +36,7 @@ export default class {
     this.addObjects();
 
     this.setupRenderer();
+    this.setupPhysicWorld();
   }
 
   setupRenderer() {
@@ -47,8 +51,17 @@ export default class {
     this.camera.position.z = 5;
   }
 
+  setupPhysicWorld() {
+    this.world.gravity.set(0, -1.2, 0);
+  }
+
   addObjects() {
-    this.slideshow = new SlideShow(this.scene, this.viewport, this.screen);
+    this.slideshow = new SlideShow(
+      this.scene,
+      this.world,
+      this.viewport,
+      this.screen
+    );
   }
 
   update() {
