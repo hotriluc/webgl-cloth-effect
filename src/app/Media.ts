@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import * as C from "cannon-es";
 
 import { ISizes } from "../interface/Size.interface";
 
@@ -8,41 +7,27 @@ import fragmentShader from "../shaders/sketch/fragment.glsl";
 
 interface IConstructor {
   element: HTMLElement;
-  geometry: THREE.BufferGeometry;
-  world: C.World;
+  geometry: THREE.PlaneGeometry;
   scene: THREE.Scene;
   screen: ISizes;
   viewport: ISizes;
 }
 
-const mass = 1;
-const segments = 8;
-
-export default class Tile {
+export default class Media {
   image: HTMLImageElement | null;
   bounds: DOMRect | undefined;
-  stitches: Array<C.Body> = [];
 
-  world: C.World;
   scene: THREE.Scene;
   screen: ISizes;
   viewport: ISizes;
 
-  geometry: THREE.BufferGeometry;
+  geometry: THREE.PlaneGeometry;
   mesh: THREE.Mesh | null = null;
 
-  constructor({
-    element,
-    geometry,
-    scene,
-    world,
-    screen,
-    viewport,
-  }: IConstructor) {
+  constructor({ element, geometry, scene, screen, viewport }: IConstructor) {
     this.image = element.querySelector("img");
 
     this.scene = scene;
-    this.world = world;
 
     this.screen = screen;
     this.viewport = viewport;
@@ -55,7 +40,6 @@ export default class Tile {
   setup() {
     this.createMesh();
     this.createBounds();
-    this.createStitches();
   }
 
   createBounds() {
@@ -115,55 +99,6 @@ export default class Tile {
     this.scene.add(this.mesh);
   }
 
-  createStitches() {
-    const particleShape = new C.Particle();
-    const { position } = this.geometry.attributes;
-    this.stitches = [];
-
-    // To create soft material body
-    // We will add particle shape to each vertex of our geometry
-    for (let i = 0; i < position.count; i++) {
-      // calculating which row
-      const row = Math.floor(i / (segments + 1));
-
-      // Because in createBounds() position values are already normalized
-      // so stitches pos don't need to be normalized
-      const pos = new C.Vec3(
-        position.getX(i),
-        position.getY(i),
-        position.getZ(i)
-      );
-
-      const stitch = new C.Body({
-        // We divide the mass of our body by the total number of points in our mesh.
-        // This way, an object with a lot of vertices doesn’t have a bigger mass.
-        mass: row === 0 ? 0 : mass / position.count,
-        linearDamping: 0.8,
-        position: pos,
-        shape: particleShape,
-        velocity: new C.Vec3(0, 0, -2),
-      });
-
-      this.stitches.push(stitch);
-      this.world.addBody(stitch);
-    }
-
-    // Making distance constraint between neighbor vertices
-    for (let i = 0; i < position.count; i++) {
-      const col = i % (segments + 1);
-      const row = Math.floor(i / (segments + 1));
-
-      if (col < segments) this.connect(i, i + 1);
-      if (row < segments) this.connect(i, i + segments + 1);
-    }
-  }
-
-  connect(i: number, j: number) {
-    const c = new C.DistanceConstraint(this.stitches[i], this.stitches[j]);
-
-    this.world.addConstraint(c);
-  }
-
   updateScale() {
     if (this.mesh && this.bounds) {
       this.mesh.scale.x =
@@ -193,27 +128,10 @@ export default class Tile {
     }
   }
 
-  // Translate Stitches position from Physic world to ThreeJS
-  updateStitches() {
-    const { position } = this.geometry.attributes;
-
-    for (let i = 0; i < position.count; i++) {
-      position.setXYZ(
-        i,
-        this.stitches[i].position.x,
-        this.stitches[i].position.y,
-        this.stitches[i].position.z
-      );
-    }
-
-    position.needsUpdate = true;
-  }
-
   update() {
     this.updateScale();
     this.updateX();
     this.updateY();
-    this.updateStitches();
   }
 
   onResize(sizes: { screen: ISizes; viewport: ISizes }) {

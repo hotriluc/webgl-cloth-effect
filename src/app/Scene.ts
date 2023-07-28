@@ -2,9 +2,9 @@ import * as THREE from "three";
 import * as C from "cannon-es";
 
 import { ISizes } from "../interface/Size.interface";
-import SlideShow from "./SlideShow";
+import Gallery from "./Gallery";
 
-export default class {
+export default class Scene {
   screen: ISizes = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -22,7 +22,7 @@ export default class {
   scene: THREE.Scene = new THREE.Scene();
   world: C.World = new C.World();
 
-  slideshow: SlideShow | null = null;
+  gallery: Gallery | null = null;
 
   constructor() {
     this.setup();
@@ -56,7 +56,7 @@ export default class {
   }
 
   addObjects() {
-    this.slideshow = new SlideShow(
+    this.gallery = new Gallery(
       this.scene,
       this.world,
       this.viewport,
@@ -65,7 +65,8 @@ export default class {
   }
 
   update() {
-    this.slideshow?.update();
+    this.world.step(1 / 60);
+    this.gallery?.update();
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -91,7 +92,7 @@ export default class {
       height,
     };
 
-    this.slideshow?.onResize({ screen: this.screen, viewport: this.viewport });
+    this.gallery?.onResize({ screen: this.screen, viewport: this.viewport });
   }
 
   // Events binding
