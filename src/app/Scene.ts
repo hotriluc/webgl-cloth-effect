@@ -1,11 +1,15 @@
 import * as THREE from "three";
+import * as C from "cannon-es";
 
-export default class {
-  screen: { width: number; height: number } = {
+import { ISizes } from "../interface/Size.interface";
+import Gallery from "./Gallery";
+
+export default class Scene {
+  screen: ISizes = {
     width: window.innerWidth,
     height: window.innerHeight,
   };
-  viewport: { width: number; height: number } = {
+  viewport: ISizes = {
     width: 0,
     height: 0,
   };
@@ -17,39 +21,60 @@ export default class {
   camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
   scene: THREE.Scene = new THREE.Scene();
 
+  world: C.World = new C.World();
+  gallery: Gallery | null = null;
+
   constructor() {
-    this.init();
+    this.setup();
+    this.bindEvents();
   }
 
-  init() {
-    this.setupRenderer();
+  setup() {
     this.setupCamera();
-    this.setSizes();
+    this.onResize();
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    this.scene.add(cube);
+    this.addObjects();
 
-    this.update();
-    this.addEventListeners();
+    this.setupRenderer();
+    this.setupPhysicWorld();
   }
 
   setupRenderer() {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setAnimationLoop(() => {
+      this.update();
+    });
   }
 
   setupCamera() {
     this.camera.fov = 45;
     this.camera.position.z = 5;
+    this.camera.rotation.z = -Math.PI / 6;
   }
 
-  /**
-   * Handlers
-   */
+  setupPhysicWorld() {
+    this.world.gravity.set(0, -1.2, 0);
+  }
+
+  addObjects() {
+    this.gallery = new Gallery(
+      this.scene,
+      this.world,
+      this.viewport,
+      this.screen
+    );
+  }
+
+  update() {
+    this.world.step(1 / 60);
+    this.gallery?.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  // Event Handlers Callbacks
   onWheel() {}
 
-  setSizes() {
+  onResize() {
     this.screen = {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -67,18 +92,12 @@ export default class {
       width,
       height,
     };
+
+    this.gallery?.onResize({ screen: this.screen, viewport: this.viewport });
   }
 
-  update() {
-    requestAnimationFrame(this.update.bind(this));
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  /**
-   * Add Event Listeners
-   */
-
-  addEventListeners() {
-    window.addEventListener("resize", this.setSizes.bind(this));
+  // Events binding
+  bindEvents() {
+    window.addEventListener("resize", this.onResize.bind(this));
   }
 }

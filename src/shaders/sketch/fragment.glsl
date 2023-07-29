@@ -57,23 +57,14 @@ void main() {
   
   // calculate new uv with new ratio
   // using this way we imitate the object-fit: cover
-  vec2 st0 = vec2(
+  vec2 st = vec2(
     vUv.x * ratio.x + (1.0 - ratio.x) * 0.5,
     vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
   );
 
-  vec2 st1 = st0;
-  st1 = fract(st1 * 500.0) ;
+  vec4 image = texture2D(u_map , st);
 
-  // create noise
-  float noise_frequency = 2000.0;
-  float noise_influence_coef = 0.5;
-  float nois = cnoise(st1 * noise_frequency);
-
-  // load image
-  vec4 image = texture2D(u_map , st0);
-
-  vec3 res = vec3(nois * noise_influence_coef) + image.rgb ;
+  vec3 res = image.rgb ;
 
   gl_FragColor = vec4(res, 1.0);
 }
