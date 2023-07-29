@@ -26,7 +26,7 @@ export default class Wind {
     this.force = baseForce / count;
     this.clock = new THREE.Clock();
 
-    this.direction = new THREE.Vector3(0.2, 0, -0.5);
+    this.direction = new THREE.Vector3(0, 0, -0.4);
 
     // each cell will contain force direction vector(wind x force)
     // these vectors will be applied to cloth stitches

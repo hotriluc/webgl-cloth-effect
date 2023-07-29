@@ -42,8 +42,8 @@ export default class Gallery {
     // Add cloth physic to first Media object
     // later add setter to Cloth class to set current media
     if (this.medias.length) {
-      this.cloth = new Cloth(this.medias[0], this.world);
-      this.wind = new Wind(this.medias[0], this.screen);
+      this.cloth = new Cloth(this.medias[1], this.world);
+      this.wind = new Wind(this.medias[1], this.screen);
     }
   }
 
