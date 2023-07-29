@@ -7,32 +7,34 @@ import fragmentShader from "../shaders/sketch/fragment.glsl";
 
 interface IConstructor {
   element: HTMLElement;
-  geometry: THREE.PlaneGeometry;
   scene: THREE.Scene;
   screen: ISizes;
   viewport: ISizes;
 }
 
-export default class Media {
-  image: HTMLImageElement | null;
-  bounds: DOMRect | undefined;
+const segments = 8;
 
+export default class Media {
   scene: THREE.Scene;
   screen: ISizes;
   viewport: ISizes;
 
-  geometry: THREE.PlaneGeometry;
+  image: HTMLImageElement | null;
+  bounds: DOMRect | undefined;
+
+  geometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(
+    1,
+    1,
+    segments,
+    segments
+  );
   mesh: THREE.Mesh | null = null;
 
-  constructor({ element, geometry, scene, screen, viewport }: IConstructor) {
+  constructor({ element, scene, screen, viewport }: IConstructor) {
     this.image = element.querySelector("img");
-
     this.scene = scene;
-
     this.screen = screen;
     this.viewport = viewport;
-
-    this.geometry = geometry;
 
     this.setup();
   }
@@ -59,12 +61,11 @@ export default class Media {
   createMesh() {
     const image = new Image();
 
-    // Load texture
+    // Texture loading
     if (this.image) {
       image.src = this.image.src;
 
       image.onload = () => {
-        // Update uniforms
         material.uniforms.u_image_size.value.set(
           image.naturalWidth,
           image.naturalHeight
@@ -108,7 +109,6 @@ export default class Media {
     }
   }
 
-  // Translate img X offset to 3D
   updateX(x = 0) {
     if (this.mesh && this.bounds) {
       this.mesh.position.x =
@@ -118,7 +118,6 @@ export default class Media {
     }
   }
 
-  // Translate img Y offset to 3D
   updateY(y = 0) {
     if (this.mesh && this.bounds) {
       this.mesh.position.y =

@@ -20,8 +20,8 @@ export default class Scene {
   });
   camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
   scene: THREE.Scene = new THREE.Scene();
-  world: C.World = new C.World();
 
+  world: C.World = new C.World();
   gallery: Gallery | null = null;
 
   constructor() {
@@ -49,6 +49,7 @@ export default class Scene {
   setupCamera() {
     this.camera.fov = 45;
     this.camera.position.z = 5;
+    this.camera.rotation.z = -Math.PI / 6;
   }
 
   setupPhysicWorld() {

@@ -1,15 +1,21 @@
+import * as THREE from "three";
 import * as C from "cannon-es";
+
 import Media from "./Media";
+import Wind from "./Wind";
 
 // Cloth Physic Class
 export default class Cloth {
   figure: Media;
   world: C.World;
-  stitches: Array<C.Body> = [];
-  stitchesShape: C.Particle = new C.Particle();
 
   totalMass: number = 3;
   stitchMass: number = 0;
+  stitches: Array<C.Body> = [];
+  stitchesShape: C.Particle = new C.Particle();
+
+  bufferV: THREE.Vector3 = new THREE.Vector3();
+  bufferV2: C.Vec3 = new C.Vec3();
 
   constructor(media: Media, world: C.World) {
     this.figure = media;
@@ -19,34 +25,21 @@ export default class Cloth {
     this.setStitches();
   }
 
-  /**
-   * Set mass to each stitches
-   * @param mass - stitch mass
-   */
   setStitchesMass(mass?: number) {
     const { widthSegments, heightSegments } = this.figure.geometry.parameters;
 
-    // We divide the mass of our body by the total number of points in our mesh.
-    // This way, an object with a lot of vertices doesn’t have a bigger mass.
+    // Dividing mass to number of mesh vertices in order to
+    // make sure that the object with a lot of vertices doesn’t have a bigger mass.
     this.stitchMass = mass ?? this.totalMass / (widthSegments * heightSegments);
   }
 
-  /**
-   * Creating stitches (IN PHYSIC WORLD)
-   * by adding particle body to each vertex position of a mesh
-   */
+  // Creating stitches (IN PHYSIC WORLD)
   setStitches() {
     const { position } = this.figure.geometry.attributes;
-    const { widthSegments: cols, heightSegments: rows } =
-      this.figure.geometry.parameters;
-
     this.stitches = [];
 
     for (let i = 0; i < position.count; i++) {
-      const row = Math.floor(i / (rows + 1));
-
-      // Mesh position is already normalized
-      // so no need to multiply for height and width
+      // Mesh position is already normalized so no need to multiply for height and width
       const pos = new C.Vec3(
         position.getX(i),
         position.getY(i),
@@ -54,18 +47,25 @@ export default class Cloth {
       );
 
       const stitch = new C.Body({
-        mass: row === 0 ? 0 : this.stitchMass,
+        mass: this.stitchMass,
         linearDamping: 0.8,
         position: pos,
         shape: this.stitchesShape,
-        velocity: new C.Vec3(0, 0, -2),
       });
 
       this.stitches.push(stitch);
       this.world.addBody(stitch);
     }
 
-    // Create distance constraint between neighbor vertices
+    this.sewStitches();
+  }
+
+  // Creating distance constraint between neighbor vertices
+  sewStitches() {
+    const { position } = this.figure.geometry.attributes;
+    const { widthSegments: cols, heightSegments: rows } =
+      this.figure.geometry.parameters;
+
     for (let i = 0; i < position.count; i++) {
       const col = i % (cols + 1);
       const row = Math.floor(i / (rows + 1));
@@ -76,18 +76,52 @@ export default class Cloth {
       if (row < rows) {
         this.connect(i, i + rows + 1);
       }
+
+      if (row === 0) {
+        const pos = this.stitches[i].position.clone();
+
+        pos.y += 0.5;
+
+        const b = new C.Body({
+          mass: 0,
+          position: pos,
+          shape: new C.Particle(),
+        });
+
+        const cons = new C.DistanceConstraint(this.stitches[i], b);
+
+        this.world.addConstraint(cons);
+      }
     }
   }
 
+  // Connecting two stitches
   connect(i: number, j: number) {
     const c = new C.DistanceConstraint(this.stitches[i], this.stitches[j]);
 
     this.world.addConstraint(c);
   }
 
-  /**
-   * Translate Stitches to Three World
-   */
+  // Applying wind force to the cloth
+  applyWind(wind: Wind) {
+    const { position } = this.figure.geometry.attributes;
+
+    for (let i = 0; i < position.count; i++) {
+      const stitch = this.stitches[i];
+      const windNoise = wind.flowField[i];
+
+      // Store force vector in physic world vector
+      const tmpPosPhysic = this.bufferV2.set(
+        windNoise.x,
+        windNoise.y,
+        windNoise.z
+      );
+
+      stitch.applyForce(tmpPosPhysic, C.Vec3.ZERO);
+    }
+  }
+
+  // Translating cloth physic to ThreeJS
   updateStitches() {
     if (!this.stitches.length) return;
 

@@ -1,5 +1,4 @@
 .gallery {
-  height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 5rem;
@@ -11,7 +10,7 @@
   &__figure {
     position: relative;
 
-    width: 55rem;
+    height: 55rem;
   }
 
   &__img {
@@ -19,7 +18,6 @@
     left: 0;
     object-fit: cover;
     top: 0;
-    width: 100%;
   }
 }
 
