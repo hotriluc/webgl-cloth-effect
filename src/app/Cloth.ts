@@ -9,7 +9,7 @@ export default class Cloth {
   figure: Media;
   world: C.World;
 
-  totalMass: number = 2;
+  totalMass: number = 3;
   stitchMass: number = 0;
   stitches: Array<C.Body> = [];
   stitchesShape: C.Particle = new C.Particle();

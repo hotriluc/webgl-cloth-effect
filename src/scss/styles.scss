@@ -1,8 +1,10 @@
-@import 'base/reset';
+@import "base/reset";
+@import "base/typography";
 
-@import 'utils/links.scss';
+@import "utils/links.scss";
 
-@import 'layout/header';
+@import "layout/header";
+@import "layout/main";
 
-@import 'components/gallery';
-@import 'components/canvas';
+@import "components/gallery";
+@import "components/canvas";

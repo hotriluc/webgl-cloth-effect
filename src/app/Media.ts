@@ -10,6 +10,7 @@ interface IConstructor {
   scene: THREE.Scene;
   screen: ISizes;
   viewport: ISizes;
+  index: number;
 }
 
 const segments = 8;
@@ -19,6 +20,7 @@ export default class Media {
   screen: ISizes;
   viewport: ISizes;
 
+  index: number;
   image: HTMLImageElement | null;
   bounds: DOMRect | undefined;
 
@@ -30,8 +32,10 @@ export default class Media {
   );
   mesh: THREE.Mesh | null = null;
 
-  constructor({ element, scene, screen, viewport }: IConstructor) {
+  constructor({ element, scene, screen, index, viewport }: IConstructor) {
     this.image = element.querySelector("img");
+    this.index = index;
+
     this.scene = scene;
     this.screen = screen;
     this.viewport = viewport;
