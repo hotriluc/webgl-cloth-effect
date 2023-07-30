@@ -61,13 +61,12 @@ export default class Gallery {
   getMedias() {
     if (!this.domElements.medias) return;
 
-    return Array.from(this.domElements.medias).map((el, index) => {
+    return Array.from(this.domElements.medias).map((el) => {
       const tile = new Media({
         element: el,
-        index: index,
         scene: this.scene,
-        screen: this.screen,
         viewport: this.viewport,
+        screen: this.screen,
       });
 
       return tile;
