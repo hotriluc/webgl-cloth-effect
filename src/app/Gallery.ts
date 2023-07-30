@@ -7,6 +7,8 @@ import Media from "./Media";
 import Cloth from "./Cloth";
 import Wind from "./Wind";
 
+import { gsap } from "gsap";
+
 export default class Gallery {
   scene: THREE.Scene;
   screen: ISizes = { width: 0, height: 0 };
@@ -42,6 +44,7 @@ export default class Gallery {
     };
 
     this.setup();
+    this.showText();
   }
 
   setup() {
@@ -50,8 +53,8 @@ export default class Gallery {
     // Add cloth physic to first Media object
     // later add setter to Cloth class to set current media
     if (this.medias && this.medias.length) {
-      this.cloth = new Cloth(this.medias[0], this.world);
-      this.wind = new Wind(this.medias[0], this.screen);
+      this.cloth = new Cloth(this.medias[1], this.world);
+      this.wind = new Wind(this.medias[1], this.screen);
     }
   }
 
@@ -69,6 +72,14 @@ export default class Gallery {
 
       return tile;
     });
+  }
+
+  showText() {
+    gsap.fromTo(
+      ".title__inner",
+      { y: "100%", opacity: 0 },
+      { y: 0, opacity: 1, ease: "power3.inOut", duration: 1.2 }
+    );
   }
 
   update() {
