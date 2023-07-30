@@ -16,8 +16,13 @@ export default class Gallery {
   wind: Wind | null = null;
   cloth: Cloth | null = null;
 
-  domFiguresList: Array<HTMLElement> = [];
-  medias: Array<Media> = [];
+  domElements: {
+    gallery: HTMLElement | null;
+    medias: NodeListOf<HTMLElement> | null;
+    title: NodeListOf<HTMLElement> | null;
+  };
+
+  medias: Array<Media> | undefined = [];
 
   constructor(
     scene: THREE.Scene,
@@ -29,9 +34,12 @@ export default class Gallery {
     this.world = world;
     this.viewport = viewport;
     this.screen = screen;
-    this.domFiguresList = Array.from(
-      document.querySelectorAll(".gallery__figure")
-    );
+
+    this.domElements = {
+      gallery: document.querySelector(".gallery"),
+      medias: document.querySelectorAll(".gallery__figure"),
+      title: document.querySelectorAll(".title"),
+    };
 
     this.setup();
   }
@@ -41,16 +49,19 @@ export default class Gallery {
 
     // Add cloth physic to first Media object
     // later add setter to Cloth class to set current media
-    if (this.medias.length) {
-      this.cloth = new Cloth(this.medias[1], this.world);
-      this.wind = new Wind(this.medias[1], this.screen);
+    if (this.medias && this.medias.length) {
+      this.cloth = new Cloth(this.medias[0], this.world);
+      this.wind = new Wind(this.medias[0], this.screen);
     }
   }
 
   getMedias() {
-    return this.domFiguresList.map((el) => {
+    if (!this.domElements.medias) return;
+
+    return Array.from(this.domElements.medias).map((el, index) => {
       const tile = new Media({
         element: el,
+        index: index,
         scene: this.scene,
         screen: this.screen,
         viewport: this.viewport,
@@ -61,7 +72,7 @@ export default class Gallery {
   }
 
   update() {
-    this.medias.forEach((tile) => tile.update());
+    this.medias?.forEach((tile) => tile.update());
     this.wind?.update();
     this.cloth?.update();
 
@@ -71,6 +82,6 @@ export default class Gallery {
   }
 
   onResize({ screen, viewport }: { screen: ISizes; viewport: ISizes }) {
-    this.medias.forEach((tile) => tile.onResize({ screen, viewport }));
+    this.medias?.forEach((tile) => tile.onResize({ screen, viewport }));
   }
 }

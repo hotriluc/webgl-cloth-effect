@@ -1,17 +1,18 @@
 .gallery {
-  margin-top: -15%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 5rem;
   align-items: center;
 
-  position: relative;
   visibility: hidden;
 
   &__figure {
-    position: relative;
-
     height: 55rem;
+
+    &:nth-child(1) {
+      margin-top: 15%;
+    }
   }
 
   &__img {
@@ -20,15 +21,4 @@
     object-fit: cover;
     top: 0;
   }
-}
-
-.title {
-  user-select: none;
-  pointer-events: none;
-  position: absolute;
-  font-size: 15rem;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 4;
 }
