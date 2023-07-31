@@ -57,12 +57,7 @@ export default class Scene {
   }
 
   addObjects() {
-    this.gallery = new Gallery(
-      this.scene,
-      this.world,
-      this.viewport,
-      this.screen
-    );
+    this.gallery = new Gallery(this.scene, this.world);
   }
 
   update() {
@@ -75,25 +70,19 @@ export default class Scene {
   onWheel() {}
 
   onResize() {
-    this.screen = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    const { screen } = window.APP.Layout;
 
-    this.renderer.setSize(this.screen.width, this.screen.height);
-    this.camera.aspect = this.screen.width / this.screen.height;
+    this.renderer.setSize(screen.width, screen.height);
+    this.camera.aspect = screen.width / screen.height;
     this.camera.updateProjectionMatrix();
 
     const fov = this.camera.fov * (Math.PI / 180);
     const height = 2 * Math.tan(fov / 2) * this.camera.position.z;
     const width = height * this.camera.aspect;
 
-    this.viewport = {
-      width,
-      height,
-    };
+    window.APP.Layout.setViewport(width, height);
 
-    this.gallery?.onResize({ screen: this.screen, viewport: this.viewport });
+    this.gallery?.onResize();
   }
 
   // Events binding
