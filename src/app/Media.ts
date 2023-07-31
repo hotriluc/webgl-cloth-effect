@@ -1,29 +1,19 @@
 import * as THREE from "three";
 
-import { ISizes } from "../interface/Size.interface";
-
 import vertexShader from "../shaders/sketch/vertex.glsl";
 import fragmentShader from "../shaders/sketch/fragment.glsl";
+import O from "./O";
 
 interface IConstructor {
   element: HTMLElement;
   scene: THREE.Scene;
-  screen: ISizes;
-  viewport: ISizes;
-  index: number;
 }
 
 const segments = 8;
 
-export default class Media {
+export default class Media extends O {
   scene: THREE.Scene;
-  screen: ISizes;
-  viewport: ISizes;
-
-  index: number;
-  image: HTMLImageElement | null;
-  bounds: DOMRect | undefined;
-
+  image: HTMLImageElement | null = null;
   geometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(
     1,
     1,
@@ -32,29 +22,22 @@ export default class Media {
   );
   mesh: THREE.Mesh | null = null;
 
-  constructor({ element, scene, screen, index, viewport }: IConstructor) {
+  constructor({ element, scene }: IConstructor) {
+    super(element);
+
     this.image = element.querySelector("img");
-    this.index = index;
-
     this.scene = scene;
-    this.screen = screen;
-    this.viewport = viewport;
-
-    this.setup();
-  }
-
-  setup() {
     this.createMesh();
-    this.createBounds();
+    this.scaleMesh();
   }
 
-  createBounds() {
-    this.bounds = this.image?.getBoundingClientRect();
-
-    this.updateScale();
-    this.updateX();
-    this.updateY();
-
+  scaleMesh() {
+    if (this.mesh && this.bounds) {
+      this.mesh.scale.x =
+        (this.viewport.width * this.bounds.width) / this.screen.width;
+      this.mesh.scale.y =
+        (this.viewport.height * this.bounds.height) / this.screen.height;
+    }
     if (this.mesh) {
       (
         this.mesh.material as THREE.ShaderMaterial
@@ -101,52 +84,14 @@ export default class Media {
     });
 
     this.mesh = new THREE.Mesh(this.geometry, material);
-    this.scene.add(this.mesh);
+
+    this.add(this.mesh);
+    this.scene.add(this);
   }
 
-  updateScale() {
-    if (this.mesh && this.bounds) {
-      this.mesh.scale.x =
-        (this.viewport.width * this.bounds.width) / this.screen.width;
-      this.mesh.scale.y =
-        (this.viewport.height * this.bounds.height) / this.screen.height;
-    }
-  }
-
-  updateX(x = 0) {
-    if (this.mesh && this.bounds) {
-      this.mesh.position.x =
-        -(this.viewport.width / 2) +
-        this.mesh.scale.x / 2 +
-        ((this.bounds.left - x) / this.screen.width) * this.viewport.width;
-    }
-  }
-
-  updateY(y = 0) {
-    if (this.mesh && this.bounds) {
-      this.mesh.position.y =
-        this.viewport.height / 2 -
-        this.mesh.scale.y / 2 -
-        ((this.bounds.top - y) / this.screen.height) * this.viewport.height;
-    }
-  }
-
-  update() {
-    this.updateScale();
-    this.updateX();
-    this.updateY();
-  }
-
-  onResize(sizes: { screen: ISizes; viewport: ISizes }) {
-    if (sizes) {
-      const { screen, viewport } = sizes;
-
-      if (screen) this.screen = screen;
-      if (viewport) {
-        this.viewport = viewport;
-      }
-    }
-
-    this.createBounds();
+  onResize() {
+    // Recalculate bounds
+    this.resize();
+    this.scaleMesh();
   }
 }
