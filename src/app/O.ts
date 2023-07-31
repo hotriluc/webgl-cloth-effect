@@ -42,11 +42,12 @@ export default class O extends Object3D {
 
     this.position.x = this.pos.x;
     this.position.y = this.pos.y;
-
-    this.update();
   }
 
   update(current?: number) {
-    current && (this.position.y = current + this.pos.y);
+    if (current) {
+      this.position.y =
+        (current * this.viewport.height) / this.screen.height + this.pos.y;
+    }
   }
 }

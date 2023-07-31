@@ -25,6 +25,7 @@
     "vite-plugin-glsl": "^1.1.2"
   },
   "dependencies": {
+    "@types/normalize-wheel": "^1.0.1",
     "cannon-es": "^0.20.0",
     "gsap": "^3.12.2",
     "normalize-wheel": "^1.0.1",
