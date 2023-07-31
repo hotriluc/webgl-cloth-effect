@@ -8,18 +8,20 @@ export default class O extends Object3D {
   viewport: ISizes = { width: 0, height: 0 };
   screen: ISizes = { width: 0, height: 0 };
 
-  constructor(el: HTMLElement, viewport: ISizes, screen: ISizes) {
+  constructor(el: HTMLElement) {
     super();
 
     this.el = el;
-    this.viewport = viewport;
-    this.screen = screen;
 
     this.resize();
   }
 
   resize() {
+    const { screen, viewport } = window.APP.Layout;
+
     this.bounds = this.el?.getBoundingClientRect();
+    this.screen = screen;
+    this.viewport = viewport;
 
     if (this.bounds) {
       const scaleX =

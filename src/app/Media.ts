@@ -1,7 +1,5 @@
 import * as THREE from "three";
 
-import { ISizes } from "../interface/Size.interface";
-
 import vertexShader from "../shaders/sketch/vertex.glsl";
 import fragmentShader from "../shaders/sketch/fragment.glsl";
 import O from "./O";
@@ -9,8 +7,6 @@ import O from "./O";
 interface IConstructor {
   element: HTMLElement;
   scene: THREE.Scene;
-  screen: ISizes;
-  viewport: ISizes;
 }
 
 const segments = 8;
@@ -26,12 +22,11 @@ export default class Media extends O {
   );
   mesh: THREE.Mesh | null = null;
 
-  constructor({ element, scene, viewport, screen }: IConstructor) {
-    super(element, viewport, screen);
+  constructor({ element, scene }: IConstructor) {
+    super(element);
 
     this.image = element.querySelector("img");
     this.scene = scene;
-
     this.createMesh();
     this.scaleMesh();
   }
@@ -94,16 +89,7 @@ export default class Media extends O {
     this.scene.add(this);
   }
 
-  onResize(sizes: { screen: ISizes; viewport: ISizes }) {
-    if (sizes) {
-      const { screen, viewport } = sizes;
-
-      if (screen) this.screen = screen;
-      if (viewport) {
-        this.viewport = viewport;
-      }
-    }
-
+  onResize() {
     // Recalculate bounds
     this.resize();
     this.scaleMesh();

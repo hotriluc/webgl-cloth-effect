@@ -18,9 +18,9 @@ export default class Wind {
   direction: THREE.Vector3;
   flowField: Array<THREE.Vector3>;
 
-  constructor(figure: Media, screen: ISizes) {
+  constructor(figure: Media) {
     const { count } = figure.geometry.attributes.position;
-    this.screen = screen;
+    this.screen = window.APP.Layout.screen;
 
     this.figure = figure;
     this.force = baseForce / count;
@@ -67,6 +67,10 @@ export default class Wind {
       x: x / this.screen.width - 0.5,
       y: -(y / this.screen.height) + 0.5,
     });
+  }
+
+  onResize() {
+    this.screen = window.APP.Layout.screen;
   }
 
   bindEvents() {
